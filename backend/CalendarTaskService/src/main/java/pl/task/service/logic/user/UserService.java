@@ -24,6 +24,7 @@ import static pl.task.service.logic.user.validator.UserValidator.validateRegiste
 
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;

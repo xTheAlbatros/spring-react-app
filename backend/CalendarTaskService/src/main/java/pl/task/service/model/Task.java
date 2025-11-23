@@ -30,7 +30,6 @@ public class Task implements Serializable {
 
     private String description;
 
-    @Column(nullable = false)
     private LocalDate day;
 
     private LocalTime atTime;
