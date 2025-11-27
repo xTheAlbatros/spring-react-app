@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.task.service.logic.user.dto.ChangePasswordDto;
 import pl.task.service.logic.user.dto.RegisterUserDto;
+import pl.task.service.logic.user.dto.UpdateUserDto;
 import pl.task.service.logic.user.dto.UserDto;
 import pl.task.service.logic.user.exception.UserBadRequestException;
 import pl.task.service.logic.user.exception.UserNotFoundException;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static pl.task.service.logic.shared.ExceptionConstants.USER_PASSWORDS_NOT_MATCH;
+import static pl.task.service.logic.shared.ExceptionConstants.USER_PASSWORD_INCORRECT;
 import static pl.task.service.logic.user.validator.UserValidator.validateRegisterUser;
 
 @RequiredArgsConstructor
@@ -33,7 +36,6 @@ public class UserService {
     private final TokenRepository tokenRepository;
 
 
-    @Transactional
     public User registerUser(RegisterUserDto registerUser) {
 
         validateRegisterUser(registerUser, userRepository);
@@ -46,7 +48,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public List<UserDto> getAllUsers(){
+    public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
 
         return Optional.ofNullable(users)
@@ -64,7 +66,6 @@ public class UserService {
         return userMapper.mapToUserDto(user);
     }
 
-    @Transactional
     public void deleteUser(Integer id) {
         Optional<User> foundUser = Optional.of(userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new));
@@ -72,20 +73,33 @@ public class UserService {
         foundUser.ifPresent(userRepository::delete);
     }
 
-    @Transactional
-    public void changePassword(ChangePasswordDto request, Principal connectedUser){
+    public void changePassword(ChangePasswordDto request, Principal connectedUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new UserBadRequestException("INCORRECT_PASSWORD");
+            throw new UserBadRequestException(USER_PASSWORD_INCORRECT);
         }
-        if(!request.getNewPassword().equals(request.getConfirmationPassword())){
-            throw new UserBadRequestException("PROVIDED_PASSWORDS_ARE_NOT_SAME");
+        if (!request.getNewPassword().equals(request.getConfirmationPassword())) {
+            throw new UserBadRequestException(USER_PASSWORDS_NOT_MATCH);
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
         userRepository.save(user);
+    }
+
+    public UserDto updateCurrentUser(final UpdateUserDto updateUserDto, final Principal connectedUser) {
+        final User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+
+        if (updateUserDto.getName() != null) {
+            user.setName(updateUserDto.getName());
+        }
+        if (updateUserDto.getSurname() != null) {
+            user.setSurname(updateUserDto.getSurname());
+        }
+
+        final User saved = userRepository.save(user);
+        return userMapper.mapToUserDto(saved);
     }
 }
 

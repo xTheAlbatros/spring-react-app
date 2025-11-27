@@ -25,9 +25,11 @@ public class TaskQueryRepository {
         final CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Task> query = builder.createQuery(Task.class);
         final Root<Task> root = query.from(Task.class);
+
         final Specification<Task> specification = createTaskSpecification(criteria);
         final Predicate restriction = requireNonNull(specification).toPredicate(root, query, builder);
-        query.select(root).distinct(true);
+
+        query.select(root);
         query.where(restriction);
 
         final Expression<Object> atTimeIsNull = builder.selectCase()

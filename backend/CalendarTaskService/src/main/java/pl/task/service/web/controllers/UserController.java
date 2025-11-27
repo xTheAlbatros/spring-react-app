@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import pl.task.service.logic.user.UserService;
 import pl.task.service.logic.user.dto.ChangePasswordDto;
+import pl.task.service.logic.user.dto.UpdateUserDto;
 import pl.task.service.logic.user.dto.UserDto;
 import pl.task.service.model.User;
 
@@ -49,6 +50,12 @@ public class UserController {
     public ResponseEntity<?> changePassword(@RequestBody final ChangePasswordDto request, final Principal connectedUser) {
         userService.changePassword(request, connectedUser);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/user/profile")
+    public UserDto updateCurrentUser(@RequestBody final UpdateUserDto updateUserDto,
+                                     final Principal connectedUser) {
+        return userService.updateCurrentUser(updateUserDto, connectedUser);
     }
 
 }
