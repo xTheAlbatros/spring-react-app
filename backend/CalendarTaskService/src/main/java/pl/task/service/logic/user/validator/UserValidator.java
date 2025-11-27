@@ -1,11 +1,14 @@
 package pl.task.service.logic.user.validator;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
 import pl.task.service.logic.user.dto.RegisterUserDto;
 import pl.task.service.logic.user.exception.UserBadRequestException;
 import pl.task.service.persistence.UserRepository;
 
-public class UserValidator {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class UserValidator {
 
     public static void validateRegisterUser(final RegisterUserDto registerUser, final UserRepository userRepository) {
         if (!StringUtils.hasText(registerUser.getName())) {
